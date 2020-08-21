@@ -12,6 +12,8 @@ Terraform - Orchestration
 Kubernetes - Orchestration is used in containerisation - i.e Docker, Crio - rocket
 
 
-Terraform?
+Terraform Commands:
 
--
+     terraform init
+     terraform plan - checks the steps inside the code and lists successes or errors
+     terraform apply
