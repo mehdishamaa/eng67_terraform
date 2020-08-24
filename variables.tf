@@ -1,17 +1,52 @@
-# Creating reusable variables to use in main.tf
+# This will be the VPC creation file
 
-variable "vpc_id" {
-        type = string
-        default = "vpc-07e47e9d90d2076da"
+
+# VPC Creation block of code
+resource "aws_vpc" "Eng67_Mehdi_VPC_Terraform" {
+    cidr_block = "10.10.0.0/16"
+    enable_dns_support = "true" #gives you an internal domain name
+    enable_dns_hostnames = "true" #gives you an internal host name
+    enable_classiclink = "false"
+    instance_tenancy = "default"
 }
 
-variable "name" {
-        type = string
-        default = "Eng67.Mehdi.Node.App"
+
+# Creation of public subnet
+resource "aws_subnet" "Eng67_Mehdi_Public_Subnet_Terraform" {
+    vpc_id = "${aws_vpc.Eng67_Mehdi_VPC_Terraform.id}"
+    cidr_block = "10.10.1.0/24"
+    map_public_ip_on_launch = "true" //it makes this a public subnet
+    availability_zone = var.aws_region
+    tags = {
+        Name = "Eng67_Mehdi_Public_Subnet_Terraform"
+    }
+}
+# Creation of private subnet
+resource "aws_subnet" "Eng67_Mehdi_Private_Subnet_Terraform" {
+    vpc_id = "${aws_vpc.Eng67_Mehdi_VPC_Terraform.id}"
+    cidr_block = "10.20.2.0/24"
+    map_public_ip_on_launch = "false" //it makes this a private subnet
+    availability_zone = var.aws_region
+    tags = {
+        Name = "Eng67_Mehdi_Private_Subnet_Terraform"
+    }
 }
 
 
-variable "app_ami_id" {
-        type = string
-        default = "ami-0135eaf9586569464"
+# Creating the EC2 instance
+
+resource "aws_instance" "Eng67_Mehdi_EC2_Terraform" {
+    ami = "${var.app_ami_id}"
+    instance_type = "t2.micro"
+    key_name = "DevOpsStudents"
+    associate_public_ip_address = true
+    tags = {
+      Name = "eng67.Mehdi.Terraform.EC2.App"
+    }
+
+    # VPC
+    subnet_id = "${aws_subnet.Eng67_Mehdi_Public_Subnet_Terraform.id}"
+
+    # Security Group
+    vpc_security_group_ids = ["${aws_security_group.Eng67_Mehdi_SG_Terraform.id}"]
 }
